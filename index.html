@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RA112G – Grundläggande strålningsfysik</title>
+<style>
+:root{
+  --bg:#090b10;--panel:#121722;--panel2:#171e2b;--text:#f5f7fb;--muted:#a9b2c3;
+  --accent:#7dd3fc;--accent2:#c4b5fd;--good:#34d399;--bad:#fb7185;--line:#293142;
+  --shadow:0 18px 50px rgba(0,0,0,.28);--radius:22px;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:
+radial-gradient(circle at 15% 0%,rgba(125,211,252,.08),transparent 28%),
+radial-gradient(circle at 90% 15%,rgba(196,181,253,.08),transparent 26%),var(--bg);color:var(--text);min-height:100vh}
+button{font:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 20px 70px}
+.brand{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:26px}
+.brand h1{font-size:clamp(24px,3.2vw,42px);margin:0;letter-spacing:-.03em}
+.brand p{margin:7px 0 0;color:var(--muted)}
+.badge{border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:999px;padding:8px 12px;color:var(--muted);font-size:13px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.quiz-card{display:flex;flex-direction:column;min-height:275px}
+.quiz-card h2{font-size:22px;margin:8px 0 10px}
+.quiz-card p{color:var(--muted);line-height:1.55;margin:0}
+.quiz-card .meta{margin-top:auto;padding-top:18px;color:#cbd5e1;font-size:14px}
+.kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.btn{border:0;border-radius:14px;padding:12px 16px;cursor:pointer;transition:.16s ease;font-weight:700}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#071018}
+.btn-secondary{background:#202838;color:var(--text);border:1px solid #303a4d}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.btn:focus-visible,.option:focus-visible{outline:3px solid rgba(125,211,252,.65);outline-offset:3px}
+.btn:disabled{cursor:not-allowed;opacity:.45;transform:none;filter:none}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hidden{display:none!important}
+.quiz-shell{max-width:850px;margin:0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.progress-wrap{flex:1}
+.progress-label{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-bottom:7px}
+.progress{height:8px;background:#1d2533;border-radius:999px;overflow:hidden}
+.progress > div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:.25s}
+.question-card{padding:28px}
+.question-card h2{font-size:clamp(22px,2.6vw,31px);line-height:1.25;margin:6px 0 22px;letter-spacing:-.02em}
+.area-pill{display:inline-flex;border:1px solid var(--line);background:#111827;border-radius:999px;padding:7px 11px;color:#cbd5e1;font-size:12px}
+.options{display:grid;gap:12px}
+.option{display:grid;grid-template-columns:38px 1fr;gap:12px;align-items:start;width:100%;text-align:left;background:#111827;border:1px solid #2b3548;color:var(--text);border-radius:15px;padding:14px 15px;cursor:pointer}
+.option:hover{border-color:#475569}
+.option.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(125,211,252,.12)}
+.option.correct{border-color:var(--good);background:rgba(52,211,153,.08)}
+.option.wrong{border-color:var(--bad);background:rgba(251,113,133,.08)}
+.option:disabled{cursor:default;color:var(--text)}
+.letter{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#202838;font-weight:800}
+.feedback{margin-top:18px;padding:16px 18px;border-radius:15px;border:1px solid var(--line);background:#0f1520;line-height:1.55}
+.feedback.good{border-color:rgba(52,211,153,.45)}
+.feedback.bad{border-color:rgba(251,113,133,.45)}
+.feedback strong{display:block;margin-bottom:5px}
+.result h2{font-size:34px;margin:0 0 8px}
+.score{font-size:64px;line-height:1;font-weight:850;letter-spacing:-.05em;margin:22px 0 8px}
+.result p{color:var(--muted)}
+.result-overview{display:grid;grid-template-columns:minmax(170px,.7fr) minmax(260px,1.3fr);gap:18px;align-items:stretch;margin-top:20px}
+.score-panel,.recommendation{padding:18px;border-radius:16px;border:1px solid var(--line);background:#0f1520}
+.score-panel .score{margin:2px 0 8px}
+.recommendation h3{font-size:17px;margin:0 0 8px}
+.recommendation p{margin:0;line-height:1.55}
+.section-label{margin:25px 0 10px;color:#dce5f2;font-size:14px;font-weight:800}
+.area-results{margin-top:22px;display:grid;gap:10px}
+.area-results{margin-top:0}
+.area-row{display:grid;grid-template-columns:1fr auto;gap:8px 14px;padding:14px 15px;background:#111827;border:1px solid var(--line);border-radius:13px}
+.area-row.prioritize{border-color:rgba(251,113,133,.5)}
+.area-row.repeat{border-color:rgba(251,191,36,.45)}
+.area-row.strong{border-color:rgba(52,211,153,.4)}
+.area-name{font-weight:720}
+.area-score{font-variant-numeric:tabular-nums}
+.area-status{grid-column:1/-1;color:var(--muted);font-size:12px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px}
+.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:999px;margin-right:6px;background:var(--good)}
+.legend span:nth-child(2)::before{background:#fbbf24}
+.legend span:nth-child(3)::before{background:var(--bad)}
+.note{margin-top:20px;color:var(--muted);font-size:13px;line-height:1.55}
+footer{margin-top:30px;text-align:center;color:#6f7a8d;font-size:12px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.brand{align-items:flex-start}.badge{display:none}.wrap{padding-top:22px}.question-card{padding:20px}.result-overview{grid-template-columns:1fr}.topbar{align-items:stretch;flex-wrap:wrap}.progress-wrap{order:3;flex-basis:100%}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.progress>div{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="home">
+    <div class="brand">
+      <div>
+        <h1>Grundläggande strålningsfysik</h1>
+        <p>RA112G · Träna, kontrollera och repetera dina kunskaper.</p>
+      </div>
+      <div class="badge">Självrättande · obegränsat antal försök</div>
+    </div>
+
+    <div class="grid">
+      <article class="card quiz-card">
+        <div class="kicker">Quiz 1</div>
+        <h2>Grundläggande strålningsfysik</h2>
+        <p>Frågor från fem områden: jonisation och röntgenrör, attenuering, bildkvalitet/AEC/detektorer, CT samt dosimetri/biologi/strålskydd.</p>
+        <div class="meta">15–25 frågor · 3–5 slumpade frågor från varje område</div>
+        <div class="actions"><button class="btn btn-primary" onclick="startQuiz('q1')">Starta quiz</button></div>
+      </article>
+
+      <article class="card quiz-card">
+        <div class="kicker">Quiz 2</div>
+        <h2>Vad händer om...?</h2>
+        <p>Korta kliniska och fysikaliska situationer där du behöver följa ett orsak–verkan-samband.</p>
+        <div class="meta">8–10 slumpade frågor per försök</div>
+        <div class="actions"><button class="btn btn-primary" onclick="startQuiz('q2')">Starta quiz</button></div>
+      </article>
+
+      <article class="card quiz-card">
+        <div class="kicker">Quiz 3</div>
+        <h2>Tillämpad strålningsfysik</h2>
+        <p>Lite längre och mer resonerande frågor som knyter ihop flera delar av kursens fysik.</p>
+        <div class="meta">10 slumpade frågor per försök</div>
+        <div class="actions"><button class="btn btn-primary" onclick="startQuiz('q3')">Starta quiz</button></div>
+      </article>
+    </div>
+    <div class="note">Frågorna och svarsalternativen slumpas vid varje nytt försök. Den senaste frågekombinationen sparas endast lokalt i webbläsaren, så att exakt samma kombination inte visas direkt igen. Inga resultat skickas eller sparas centralt.</div>
+    <footer>RA112G – Grundläggande strålningsfysik · Övningsquiz</footer>
+  </section>
+
+  <section id="quiz" class="hidden quiz-shell">
+    <div class="topbar">
+      <button class="btn btn-ghost" onclick="goHome()">Till startsidan</button>
+      <div class="progress-wrap">
+        <div class="progress-label"><span id="quizTitle"></span><span id="progressText"></span></div>
+        <div class="progress"><div id="progressBar"></div></div>
+      </div>
+      <button class="btn btn-secondary" onclick="newQuiz()">Nytt quiz</button>
+    </div>
+
+    <article class="card question-card" id="questionCard">
+      <div id="areaPill" class="area-pill"></div>
+      <h2 id="questionText" tabindex="-1"></h2>
+      <div id="options" class="options"></div>
+      <div id="feedback" class="feedback hidden"></div>
+      <div class="actions">
+        <button id="checkBtn" class="btn btn-primary" onclick="checkAnswer()" disabled>Kontrollera svar</button>
+        <button id="nextBtn" class="btn btn-secondary hidden" onclick="nextQuestion()">Nästa fråga</button>
+      </div>
+    </article>
+
+    <article id="resultCard" class="card result hidden">
+      <div class="kicker">Resultat</div>
+      <h2 id="resultTitle"></h2>
+      <div class="result-overview">
+        <div class="score-panel">
+          <div class="score" id="score"></div>
+          <p id="scoreText"></p>
+        </div>
+        <div id="recommendation" class="recommendation"></div>
+      </div>
+      <div class="section-label">Resultat per kunskapsområde</div>
+      <div id="areaResults" class="area-results"></div>
+      <div class="legend"><span>Bra grund: 80–100 %</span><span>Repetera: 60–79 %</span><span>Prioritera: 0–59 %</span></div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="newQuiz()">Nytt quiz</button>
+        <button class="btn btn-secondary" onclick="goHome()">Till startsidan</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<script>
+const Q=(area,q,opts,ans,fb)=>({area,q,opts,ans,fb});
+const quiz1 = {
+"Område 1 – Jonisation, röntgenrör och röntgenspektrum":[
+Q("", "Vad innebär jonisation?", ["En elektron flyttas till en högre energinivå men stannar kvar i atomen.","En elektron får tillräckligt med energi för att lämna atomen.","En elektron flyttas till en lägre energinivå och absorberar energi.","Atomkärnan avger energi utan att atomens elektroner påverkas."],1,"Jonisation innebär att en bunden elektron frigörs från atomen."),
+Q("", "Vad skiljer excitation från jonisation?", ["Vid excitation lämnar elektronen atomen, medan den stannar kvar vid jonisation.","Vid excitation påverkas atomkärnan, medan elektronerna påverkas vid jonisation.","Vid excitation flyttas en elektron till ett högre energitillstånd men är fortfarande bunden till atomen.","Vid excitation skapas alltid röntgenstrålning, medan jonisation endast ger värme."],2,"Vid excitation är elektronen fortfarande bunden till atomen; vid jonisation frigörs den."),
+Q("", "Varför räknas röntgenstrålning som joniserande strålning?", ["Röntgenfotonerna kan ha tillräckligt hög energi för att frigöra bundna elektroner från atomer.","Röntgenstrålning består av elektriskt laddade fotoner som drar ut elektroner ur atomer.","Röntgenstrålning har lång våglängd och kan därför påverka atomkärnan.","Röntgenstrålning orsakar alltid jonisation när den passerar genom materia."],0,"Röntgenfotoner kan ha tillräcklig energi för att slå loss bundna elektroner."),
+Q("", "Vilket samband mellan våglängd, frekvens och fotonenergi är korrekt?", ["Längre våglängd innebär högre frekvens och högre fotonenergi.","Kortare våglängd innebär lägre frekvens men högre fotonenergi.","Kortare våglängd innebär högre frekvens men lägre fotonenergi.","Kortare våglängd innebär högre frekvens och högre fotonenergi."],3,"Kortare våglängd motsvarar högre frekvens och därmed högre fotonenergi."),
+Q("", "Vilka är röntgenrörets två huvudpoler?", ["Generator och kollimator.","Katod och anod.","Filter och detektor.","Glödtråd och rörfönster."],1,"Röntgenröret har katod och anod som två huvudpoler."),
+Q("", "Vilken är katodens huvudsakliga funktion i röntgenröret?", ["Att absorbera lågenergetiska röntgenfotoner innan de når patienten.","Att omvandla röntgenstrålning till elektriska signaler.","Att frigöra elektroner och bidra till att rikta dem mot anoden.","Att bromsa elektronerna och omvandla deras energi till röntgenstrålning."],2,"Katoden frigör elektroner och fokuserar dem mot anoden."),
+Q("", "Vad händer vid termisk emission i röntgenröret?", ["Uppvärmningen av glödtråden gör att elektroner frigörs från katoden.","Elektroner bromsas vid anoden och omvandlas till värme.","Röntgenfotoner frigör elektroner från anodens inre elektronskal.","Elektroner återgår till lägre energinivåer och avger karakteristisk strålning."],0,"Termisk emission är frigörandet av elektroner från den uppvärmda glödtråden."),
+Q("", "Vilken funktion har högspänningen mellan katod och anod?", ["Den bestämmer hur stort strålfältet blir.","Den kyler anoden under exponeringen.","Den reglerar hur snabbt anoden roterar.","Den accelererar elektronerna från katoden mot anoden."],3,"Potentialskillnaden accelererar elektronerna mot anoden."),
+Q("", "Vad händer huvudsakligen med elektronernas energi när de träffar anoden?", ["Nästan all energi omvandlas till röntgenstrålning och en liten del till värme.","Nästan all energi omvandlas till värme och en liten del till röntgenstrålning.","Energin delas ungefär lika mellan värme och röntgenstrålning.","Energin lagras huvudsakligen i anodmaterialet och frigörs efter exponeringen."],1,"Röntgenproduktion är ineffektiv; nästan all elektronenergi blir värme."),
+Q("", "Varför används ofta en roterande anod i diagnostiska röntgenrör?", ["För att öka elektronernas hastighet mellan katod och anod.","För att göra röntgenstrålningen mer homogen innan den lämnar röret.","För att fördela värmebelastningen över en större del av anodens yta.","För att minska mängden spridd strålning från patienten."],2,"Rotationen fördelar värmen över en större anodarea."),
+Q("", "Hur uppkommer bromsstrålning?", ["En snabb elektron påverkas av atomkärnans elektriska fält, bromsas och avger energi som en röntgenfoton.","En elektron från ett yttre skal fyller en vakant plats i ett inre skal och avger en röntgenfoton.","En röntgenfoton absorberas helt och frigör en elektron från anodmaterialet.","Två elektroner kolliderar och deras sammanlagda energi omvandlas till en röntgenfoton."],0,"Bromsstrålning uppstår när snabba elektroner bromsas i atomkärnans elektriska fält."),
+Q("", "Varför får bromsstrålningen ett kontinuerligt spektrum av olika fotonenergier?", ["Elektronerna har alltid samma energi men anodmaterialets temperatur varierar.","Varje elektrons hela rörelseenergi omvandlas alltid till flera identiska fotoner.","De karakteristiska energinivåerna i anodmaterialet varierar kontinuerligt.","Elektronerna kan förlora olika stora delar av sin rörelseenergi vid olika växelverkningar."],3,"Olika stora energiförluster ger bromsstrålningsfotoner med olika energier."),
+Q("", "Hur uppkommer karakteristisk röntgenstrålning?", ["En elektron bromsas in nära atomkärnan och avger en foton med valfri energi.","En elektron från ett yttre skal fyller en vakant plats i ett inre skal och energiskillnaden avges som en röntgenfoton.","En elektron från katoden återvänder till glödtråden och avger sin rörelseenergi.","Röntgenfotoner filtreras genom anodmaterialet och får därigenom bestämda energier."],1,"Karakteristisk strålning uppstår vid övergång mellan bestämda elektronskal."),
+Q("", "Varför har karakteristisk röntgenstrålning bestämda fotonenergier?", ["Rörströmmen bestämmer vilka energinivåer elektronerna kan ha.","Alla elektroner som träffar anoden har exakt samma rörelseenergi.","Fotonenergin motsvarar skillnaden mellan bestämda bindningsenergier i anodens elektronskal.","Filtreringen gör att endast en bestämd fotonenergi kan lämna röntgenröret."],2,"Fotonenergin motsvarar skillnaden mellan diskreta bindningsenergier."),
+Q("", "Vad händer med röntgenspektrumet när rörspänningen, kV, ökas?", ["Den maximala fotonenergin ökar och strålningen blir mer genomträngande.","Den maximala fotonenergin är oförändrad men antalet fotoner minskar.","Den maximala fotonenergin minskar medan medelenergin ökar.","Endast mängden karakteristisk strålning påverkas medan bromsstrålningen är oförändrad."],0,"Högre kV höjer den maximala fotonenergin och ökar genomträngningsförmågan."),
+Q("", "Vad händer främst när mAs ökas medan övriga inställningar hålls oförändrade?", ["Fotonernas maximala energi ökar men antalet fotoner är oförändrat.","Både den maximala fotonenergin och medelenergin ökar kraftigt.","Strålningen får kortare våglängd men antalet producerade fotoner minskar.","Antalet producerade röntgenfotoner ökar medan den maximala fotonenergin är oförändrad."],3,"mAs påverkar främst fotonmängden, inte den maximala energin."),
+Q("", "Vad är den huvudsakliga effekten av ökad filtrering av röntgenstrålningen?", ["Framför allt högenergetiska fotoner avlägsnas, vilket sänker strålningens medelenergi.","Framför allt lågenergetiska fotoner avlägsnas, vilket höjer medelenergin hos den kvarvarande strålningen.","Antalet fotoner ökar eftersom filtreringen stimulerar ytterligare röntgenproduktion i anoden.","Den maximala fotonenergin ökar eftersom fotonerna får extra energi när de passerar filtret."],1,"Filtrering tar främst bort lågenergetiska fotoner och höjer medelenergin hos den kvarvarande strålningen."),
+Q("", "Vilket påstående beskriver bäst skillnaden mellan hur kV och mAs påverkar röntgenstrålningen?", ["kV och mAs påverkar endast fotonmängden men inte strålningens energifördelning.","kV påverkar främst antalet fotoner, medan mAs bestämmer den maximala fotonenergin.","kV påverkar strålningens energifördelning och genomträngningsförmåga, medan mAs främst påverkar antalet producerade fotoner.","kV bestämmer endast mängden karakteristisk strålning, medan mAs endast påverkar mängden bromsstrålning."],2,"kV styr främst energifördelning/genomträngning, medan mAs främst styr fotonantalet.")
+],
+"Område 2 – Attenuering och växelverkan":[
+Q("", "Vad betyder attenuering av röntgenstrålning?", ["Att röntgenfotonerna alltid förlorar lite energi men fortsätter i samma riktning.","Att antalet fotoner i primärstrålen minskar genom absorption och spridning.","Att röntgenstrålningen ökar i intensitet när den passerar genom materia.","Att röntgenfotonerna omvandlas till synligt ljus inne i patienten."],1,"Attenuering innebär minskning av primärstrålen genom absorption och spridning."),
+Q("", "Vilka två processer bidrar huvudsakligen till att fotoner avlägsnas från primärstrålen?", ["Excitation och jonisation.","Filtrering och kollimering.","Absorption och spridning.","Detektion och rekonstruktion."],2,"Absorption och spridning är de två huvudsakliga orsakerna till attenuering."),
+Q("", "Vad händer med en röntgenfoton som passerar genom patienten utan att växelverka?", ["Den fortsätter i sin ursprungliga riktning och kan nå detektorn.","Den ändrar riktning men behåller hela sin energi.","Den absorberas i vävnaden och bidrar till patientdosen.","Den omvandlas till en elektron som registreras av detektorn."],0,"En foton som inte växelverkar fortsätter längs sin ursprungliga strålväg."),
+Q("", "Hur påverkar ökad materialtjocklek attenueringen?", ["Attenueringen minskar eftersom strålningen sprids över ett större område.","Attenueringen är oförändrad så länge materialets densitet är densamma.","Attenueringen ökar eftersom fotonerna får fler möjligheter att växelverka.","Attenueringen minskar eftersom fotonerna får högre energi under passagen."],2,"Längre strålväg genom materia ger större sannolikhet för växelverkan."),
+Q("", "Vilken kombination av faktorer påverkar attenueringen av röntgenstrålning?", ["Fotonenergi, materialets tjocklek, densitet och grundämnessammansättning.","Endast fotonenergi och detektorns pixelstorlek.","Endast materialets temperatur och exponeringstid.","Rörström, bildskärmens ljusstyrka och patientens position efter exponeringen."],0,"Attenuering beror både på strålningens energi och materialets egenskaper."),
+Q("", "Vad innebär exponentiell attenuering?", ["Varje lika tjockt materialskikt tar bort samma antal fotoner.","Varje lika tjockt materialskikt tar bort samma andel av de fotoner som återstår.","All strålning absorberas när materialtjockleken har fördubblats.","Attenueringen ökar linjärt med rörspänningen."],1,"Vid exponentiell attenuering avlägsnas samma andel av den kvarvarande primärstrålningen."),
+Q("", "Vad beskriver ett halvvärdesskikt, HVL?", ["Den materialtjocklek som minskar primärstrålens intensitet till hälften.","Den fotonenergi där hälften av fotonerna absorberas i detektorn.","Den strålningstid som krävs för att halvera patientdosen.","Den tjocklek som fördubblar röntgenstrålningens medelenergi."],0,"HVL är den materialtjocklek som halverar primärstrålens intensitet."),
+Q("", "Vad innebär ett större halvvärdesskikt?", ["Strålningen attenueras snabbare och är mindre genomträngande.","Strålningen är mer genomträngande och kräver större materialtjocklek för att halveras.","Strålningen innehåller fler fotoner men har alltid lägre fotonenergi.","Materialets attenueringsförmåga har ökat oberoende av strålningens energi."],1,"Större HVL betyder att mer material behövs för att halvera strålningen."),
+Q("", "Vad händer med röntgenfotonen vid fotoelektrisk absorption?", ["Den förlorar en del av sin energi och fortsätter i en ny riktning.","Den passerar genom atomen utan att växelverka.","Den absorberas helt och överför sin energi till en bunden elektron.","Den delas upp i två fotoner med lägre energi."],2,"Vid fotoelektrisk absorption försvinner fotonen helt och dess energi överförs till en elektron."),
+Q("", "Vilken elektron deltar vanligen vid fotoelektrisk absorption?", ["En hårt bunden elektron i ett inre elektronskal.","En fri elektron långt utanför atomen.","En elektron som redan befinner sig i detektorn.","En elektron från röntgenrörets katod."],0,"Fotoelektrisk absorption sker typiskt med en hårt bunden inre elektron."),
+Q("", "Under vilka förhållanden gynnas fotoelektrisk absorption?", ["Vid högre fotonenergi och material med lågt atomnummer.","Vid lägre fotonenergi och material med högre atomnummer.","Endast när fotonenergin är oberoende av materialets sammansättning.","Vid hög fotonenergi och låg materialtäthet."],1,"Fotoelektrisk absorption gynnas av lägre fotonenergi och högre atomnummer."),
+Q("", "Vilken betydelse har fotoelektrisk absorption för bildkontrasten?", ["Den kan bidra till tydliga skillnader i attenuering mellan olika vävnader.","Den minskar alltid kontrasten genom att skapa stora mängder spridd strålning.","Den påverkar endast patientdosen och har ingen betydelse för bildinformationen.","Den gör att alla vävnader attenuerar röntgenstrålning lika mycket."],0,"Skillnader i fotoelektrisk absorption kan bidra till tydliga kontrastskillnader."),
+Q("", "Vad händer vid Comptonspridning?", ["Fotonen absorberas helt och ingen foton finns kvar efter växelverkan.","Fotonen överför en del av sin energi till en elektron och fortsätter med lägre energi i en ny riktning.","Fotonen ökar sin energi genom växelverkan med en bunden elektron.","Fotonen passerar genom atomen utan att varken ändra riktning eller energi."],1,"Vid Comptonspridning fortsätter en spridd foton med lägre energi i ny riktning."),
+Q("", "Vilken elektron växelverkar en röntgenfoton huvudsakligen med vid Comptonspridning?", ["En relativt löst bunden elektron.","En proton i atomkärnan.","En hårt bunden elektron i det innersta skalet.","En elektron som redan har lämnat patienten."],0,"Comptonspridning sker huvudsakligen mot relativt löst bundna elektroner."),
+Q("", "Hur påverkar Comptonspridd strålning bildkontrasten när den når detektorn?", ["Den ökar kontrasten eftersom den förstärker skillnader mellan olika vävnader.","Den påverkar endast upplösningen men inte kontrasten.","Den tillför en mer ospecifik signal och minskar bildkontrasten.","Den eliminerar kvantbrus och gör bilden mer homogen."],2,"Spridd strålning tillför ospecifik signal och reducerar kontrasten."),
+Q("", "Varför är Comptonspridning viktig ur personalens strålskyddsperspektiv?", ["Spridda fotoner kan lämna patienten och bidra till personalens exponering.","Comptonfotoner stannar alltid kvar i patienten och påverkar därför endast patienten.","Comptonspridning uppstår endast inne i röntgenröret och når aldrig personalen.","Comptonprocessen minskar alltid mängden strålning runt patienten."],0,"Patienten blir en viktig källa till spridd strålning för personalen."),
+Q("", "Vilken åtgärd minskar både den bestrålade vävnadsvolymen och mängden spridd strålning?", ["Ökad bildskärmsljusstyrka.","Större strålfält.","Noggrann kollimering/inbländning.","Digital beskärning av bilden efter exponeringen."],2,"Noggrann kollimering minskar både bestrålad vävnadsvolym och spridd strålning."),
+Q("", "Vilket påstående beskriver bäst skillnaden mellan fotoelektrisk absorption och Comptonspridning?", ["Vid fotoelektrisk absorption fortsätter fotonen med lägre energi, medan den försvinner helt vid Comptonspridning.","Vid fotoelektrisk absorption absorberas fotonen helt, medan en foton med lägre energi fortsätter i ny riktning vid Comptonspridning.","Båda processerna innebär att fotonen passerar patienten utan energiöverföring.","Båda processerna påverkar endast patientdosen och saknar betydelse för bildkvaliteten."],1,"Fotoelektrisk absorption tar bort fotonen helt; Compton lämnar en spridd foton med lägre energi.")
+],
+"Område 3 – Bildkvalitet, AEC och detektorer":[
+Q("", "Vilka tre begrepp används centralt för att beskriva bildkvalitet inom röntgen?", ["Kontrast, rumslig upplösning och brus","Rörspänning, rörström och exponeringstid","Attenuering, filtrering och kollimering","Absorption, spridning och jonisation"],0,"Kontrast, rumslig upplösning och brus är centrala bildkvalitetsbegrepp."),
+Q("", "Vad beskriver bildens kontrast?", ["Hur många pixlar detektorn innehåller","Skillnaden i bildsignal eller gråton mellan olika områden","Hur snabbt bilden kan registreras","Hur stor del av patienten som bestrålas"],1,"Kontrast beskriver skillnader i signal eller gråton mellan områden."),
+Q("", "Hur påverkar ökad mängd spridd strålning som når detektorn normalt bildkontrasten?", ["Kontrasten ökar eftersom fler fotoner registreras","Kontrasten påverkas inte så länge mAs är oförändrad","Kontrasten minskar eftersom spridd strålning tillför en mer ospecifik signal","Kontrasten ökar eftersom detektorns känslighet förbättras"],2,"Spridd strålning minskar kontrasten genom att tillföra ospecifik signal."),
+Q("", "Hur påverkar noggrann kollimering/inbländning vanligtvis bildkvaliteten?", ["Den ökar mängden spridd strålning men minskar brus","Den minskar mängden spridd strålning och kan därmed förbättra kontrasten","Den ökar fotonernas maximala energi och förbättrar upplösningen","Den påverkar endast patientdosen och inte bildkvaliteten"],1,"Snäv kollimering minskar spridd strålning och kan förbättra kontrasten."),
+Q("", "Vilken beskrivning av rumslig upplösning är korrekt?", ["Förmågan att visa små strukturer som ligger nära varandra som separata detaljer","Förmågan att skapa många olika gråskalesteg","Förmågan att minska patientdosen med bibehållen fotonenergi","Förmågan att registrera ett stort antal fotoner per tidsenhet"],0,"Rumslig upplösning handlar om att särskilja små närliggande strukturer."),
+Q("", "Vilken faktor kan försämra den rumsliga upplösningen även om detektorn har små pixlar?", ["Kort exponeringstid","Noggrann centrering","Patientrörelse under exponeringen","Minskad mängd spridd strålning"],2,"Rörelse under exponeringen kan skapa oskärpa och försämra upplösningen."),
+Q("", "Vad händer med geometrisk oskärpa om objektet flyttas längre från detektorn, medan övriga förhållanden är oförändrade?", ["Den minskar eftersom objektet förstoras","Den ökar eftersom objekt–detektoravståndet blir större","Den är oförändrad eftersom endast brännfläcken påverkar oskärpan","Den försvinner om mAs samtidigt ökas"],1,"Större objekt–detektoravstånd ökar geometrisk oskärpa."),
+Q("", "Vad är kvantbrus?", ["Variationer som uppstår på grund av slumpmässiga skillnader i antalet registrerade fotoner","Oskärpa som orsakas av patientens rörelser under exponeringen","Signalvariationer som endast orsakas av bildskärmen","Kontrastförlust som uppkommer enbart genom stor pixelstorlek"],0,"Kvantbrus beror på slumpmässiga variationer i fotonantalet."),
+Q("", "Vad händer normalt med det relativa kvantbruset när fler fotoner registreras?", ["Det ökar eftersom fler signaler registreras samtidigt","Det minskar eftersom den relativa statistiska variationen blir mindre","Det är oförändrat eftersom brus endast bestäms av detektorn","Det försvinner helt när ett visst fotonantal uppnås"],1,"Fler registrerade fotoner minskar den relativa statistiska variationen."),
+Q("", "Vad händer främst om mAs ökas medan övriga exponeringsparametrar hålls oförändrade?", ["Fotonantalet ökar, kvantbruset minskar och patientdosen ökar","Fotonenergin minskar, kvantbruset ökar och patientdosen minskar","Den rumsliga upplösningen ökar utan förändring av patientdosen","Fotonantalet minskar men bildkontrasten ökar automatiskt"],0,"Ökad mAs ger fler fotoner, mindre relativt kvantbrus och högre exponering."),
+Q("", "Varför innebär inte lägsta möjliga brus automatiskt optimal bildkvalitet?", ["Mycket lågt brus kan ha uppnåtts genom en högre exponering än vad den diagnostiska uppgiften kräver","Lågt brus innebär alltid att den rumsliga upplösningen har blivit för låg","Lågt brus leder automatiskt till sämre kontrast","Bildbrus saknar betydelse för diagnostisk information"],0,"Optimal bildkvalitet innebär tillräcklig kvalitet för uppgiften, inte maximal exponering."),
+Q("", "Vad är huvudprincipen bakom AEC vid konventionell röntgen?", ["Systemet väljer automatiskt patientens position och projektion","Systemet avslutar exponeringen när det valda mätfältet har registrerat en förinställd signalnivå","Systemet reglerar bildskärmens ljusstyrka efter avslutad exponering","Systemet minskar alltid kV tills den önskade bildkontrasten uppnås"],1,"AEC avslutar exponeringen när målsignalen i valt mätfält nås."),
+Q("", "Vad kan hända om ett aktivt AEC-mätfält delvis ligger utanför patienten?", ["Exponeringen kan avslutas för tidigt eftersom relativt oattenuerad strålning snabbt når mätfältet","Exponeringen fortsätter längre eftersom ingen strålning når mätfältet","Systemet ökar automatiskt patientens stråldos för att kompensera för den mindre kroppstjockleken","Bilden påverkas inte eftersom AEC endast mäter rörspänningen"],0,"Relativt oattenuerad strålning kan få AEC att avsluta exponeringen för tidigt."),
+Q("", "Vad kan hända om ett metallimplantat ligger över det AEC-mätfält som används?", ["Mätfältet får mer strålning och exponeringen avslutas tidigare","Mätfältet får mindre strålning och exponeringen kan fortsätta längre än nödvändigt","AEC stängs automatiskt av och övergår alltid till manuell exponering","Metall påverkar endast bildbearbetningen och inte AEC"],1,"Metall kan attenuera strålningen över mätfältet och förlänga exponeringen."),
+Q("", "Hur kan en tjockare patient påverka en AEC-styrd exponering?", ["Mindre strålning attenueras och exponeringen blir därför kortare","Mer strålning attenueras och systemet kan behöva fortsätta exponeringen längre för att uppnå målsignalen","Patienttjockleken saknar betydelse eftersom AEC alltid ger samma mAs","AEC minskar automatiskt fotonenergin för att kompensera för den ökade tjockleken"],1,"Mer attenuering kan göra att AEC behöver fortsätta exponeringen längre."),
+Q("", "Vad sker vid direkt digital detektion?", ["Röntgenenergin omvandlas först till synligt ljus och därefter till elektrisk laddning","Röntgenenergin omvandlas direkt till elektrisk laddning i ett fotokonduktivt material","Röntgenstrålningen lagras på en bildplatta som därefter måste avläsas med laser","Röntgenfotonerna omvandlas först till ultraljud och därefter till elektriska signaler"],1,"Direkt detektion omvandlar röntgenenergi direkt till elektrisk laddning."),
+Q("", "Vad sker vid indirekt digital detektion?", ["Röntgenenergin omvandlas direkt till elektrisk laddning utan något mellanliggande steg","Röntgenenergin omvandlas först till synligt ljus i en scintillator och därefter till elektrisk laddning","Röntgenstrålningen registreras direkt som digitala pixelvärden utan energiomvandling","Elektroner från katoden lagras direkt i detektorns TFT-matris"],1,"Indirekt detektion använder ett ljussteg via en scintillator."),
+Q("", "Vilket påstående om digital bildbearbetning är mest korrekt?", ["Bildbearbetning kan återskapa anatomisk information som aldrig registrerades vid exponeringen","Bildbearbetning kan minska den stråldos som patienten redan har fått","Bildbearbetning kan förändra bildens presentation, men kan inte ersätta saknad ursprunglig bildinformation","Bildbearbetning gör att korrekt exponering och positionering inte längre är nödvändiga"],2,"Bildbearbetning kan ändra presentationen men inte skapa information som aldrig registrerades.")
+],
+"Område 4 – CT":[
+Q("", "Vad är den grundläggande principen bakom datortomografi, CT?", ["En enda projektion registreras och förstärks digitalt för att skapa ett tvärsnitt.","Röntgenstrålning registreras från många riktningar och mätningarna rekonstrueras till snittbilder.","Magnetfält används för att mäta vävnaders attenuering från flera riktningar.","En detektor registrerar endast den strålning som absorberas helt i patienten."],1,"CT använder attenueringsmätningar från många vinklar för att rekonstruera snittbilder."),
+Q("", "Vad skiljer CT från konventionell röntgen på ett grundläggande sätt?", ["CT använder inte röntgenstrålning utan endast digital bildbearbetning.","CT registrerar attenuering från många vinklar och minskar problemet med anatomisk överlagring.","CT använder en enda projektion men med betydligt högre rörspänning.","CT registrerar enbart spridd strålning medan konventionell röntgen registrerar primärstrålning."],1,"CT bygger på många projektioner och ger tvärsnitt med mindre anatomisk överlagring."),
+Q("", "Vad händer under datainsamlingen i en modern CT?", ["Röntgenröret roterar runt patienten medan detektorer registrerar attenuerad strålning från olika vinklar.","Detektorringen roterar runt ett stillastående röntgenrör och mäter en enda projektion.","Röntgenröret och detektorerna står stilla medan bordet roterar runt patienten.","Patienten roteras inne i gantryt medan röntgenröret står stilla."],0,"Röntgenröret roterar runt patienten och detektorer registrerar strålningen från många vinklar."),
+Q("", "Vad är det CT-detektorerna huvudsakligen registrerar?", ["Hur mycket röntgenstrålning som återstår efter passage genom patienten.","Hur mycket röntgenstrålning som absorberas i röntgenrörets anod.","Hur stor den biologiska effekten blir i varje vävnad.","Hur mycket spridd strålning som lämnar patienten i alla riktningar."],0,"CT-detektorer mäter den strålning som återstår efter passage genom patienten."),
+Q("", "Vad menas med rådata vid CT?", ["De färdiga bilder som visas på bildskärmen efter fönstersättning.","Detektorsignaler och geometrisk information som samlats in före bildrekonstruktionen.","Endast de HU-värden som finns i den färdiga bildmatrisen.","De dosvärden som CT-systemet visar efter undersökningen."],1,"Rådata är insamlade mätdata innan de rekonstrueras till bilder."),
+Q("", "Vad är den grundläggande skillnaden mellan axial scanning och spiral-CT?", ["Vid axial scanning står bordet stilla under datainsamlingen, medan bordet rör sig kontinuerligt vid spiral-CT.","Vid axial scanning roterar bara detektorerna, medan endast röntgenröret roterar vid spiral-CT.","Vid axial scanning används lägre fotonenergi än vid spiral-CT.","Vid spiral-CT står både röntgenrör och bord stilla under varje rotation."],0,"Vid spiral-CT rör sig bordet kontinuerligt under rotationerna; vid axial scanning står det stilla under själva datainsamlingen."),
+Q("", "Vad möjliggjorde utvecklingen av kontinuerlig spiral-CT?", ["Flatpaneldetektorer som kunde flyttas manuellt mellan varje rotation.","Släpringsteknik som möjliggjorde kontinuerlig rotation utan att kablar behövde lindas upp.","Minskad användning av röntgenstrålning och övergång till ultraljudsdetektorer.","Att patientbordet började rotera i motsatt riktning mot röntgenröret."],1,"Släpringsteknik möjliggjorde kontinuerlig rotation."),
+Q("", "Vilken är en viktig fördel med multidetektor-CT, MDCT?", ["Flera detektorrader gör att en större längd av kroppen kan registreras under varje rotation.","Flera detektorrader gör att röntgenstrålning inte längre behöver användas.","Flera detektorrader eliminerar automatiskt alla rörelseartefakter.","Flera detektorrader innebär att patientdosen alltid blir lägre oberoende av protokoll."],0,"Flera detektorrader ökar täckningen per rotation."),
+Q("", "Vad används bildrekonstruktion till vid CT?", ["Att omvandla insamlade attenueringsmätningar till snittbilder.","Att bestämma hur mycket strålning röntgenröret ska producera innan datainsamlingen börjar.","Att öka patientens attenuering så att kontrasten blir större.","Att omvandla CT-bilden till en vanlig projektion."],0,"Rekonstruktion omvandlar projektionsdata till snittbilder."),
+Q("", "Vilket påstående beskriver filtrerad bakåtprojektion, FBP, bäst?", ["En snabb rekonstruktionsmetod som använder insamlade projektioner för att skapa snittbilder men som är känslig för brus.","En metod som endast används för att minska patientens rörelse före undersökningen.","En detektorteknik som filtrerar bort lågenergetiska fotoner innan de når patienten.","En metod som automatiskt ökar mAs tills bildbruset helt försvinner."],0,"FBP är en klassisk snabb rekonstruktionsmetod som kan vara brusig vid låg signal."),
+Q("", "Vilket påstående beskriver iterativ rekonstruktion bäst?", ["Bilden skapas utan att några detektordata används.","Rekonstruktionen upprepas stegvis och kan bidra till minskat brus och färre artefakter.","Metoden används endast för att skapa en scoutbild före CT-undersökningen.","Metoden höjer alltid den rumsliga upplösningen utan att påverka bildens utseende i övrigt."],1,"Iterativ rekonstruktion förbättrar bilden stegvis och kan reducera brus/artefakter."),
+Q("", "Vad beskriver Hounsfieldenheter, HU?", ["Hur starkt olika vävnader attenuerar röntgenstrålning i förhållande till vatten.","Hur många röntgenfotoner som produceras under varje rotation.","Hur mycket stråldos varje organ har absorberat.","Hur lång tid det tar att rekonstruera en CT-bild."],0,"HU beskriver attenuering relativt vatten."),
+Q("", "Vilket HU-värde används ungefär som referens för vatten?", ["−1000 HU","−100 HU","0 HU","+1000 HU"],2,"Vatten definieras ungefär som 0 HU."),
+Q("", "Vad är syftet med fönstersättning i CT?", ["Att välja hur ett visst intervall av HU-värden ska visas i gråskala.","Att ändra patientens faktiska attenuering efter undersökningen.","Att öka antalet registrerade fotoner utan ny exponering.","Att minska den redan givna stråldosen genom efterbearbetning."],0,"Fönstersättning bestämmer hur ett valt HU-intervall visas i gråskala."),
+Q("", "Vilket är ett exempel på en vanlig orsak till rörelseartefakt i CT?", ["Att patienten rör sig under datainsamlingen.","Att filtreringen före röntgenröret är för hög.","Att HU-skalan används vid bildvisningen.","Att flera detektorrader används samtidigt."],0,"Patientrörelse under datainsamlingen kan skapa rörelseartefakter."),
+Q("", "Varför kan metallföremål ge artefakter i CT?", ["Metall kan attenuera strålningen kraftigt och störa de mätningar som används i rekonstruktionen.","Metall minskar alltid attenueringen och gör att för många fotoner når detektorn.","Metall förändrar automatiskt röntgenrörets rotationshastighet.","Metall gör att detektorerna slutar omvandla röntgenstrålning till elektriska signaler."],0,"Kraftig attenuering från metall kan ge störda projektionsdata och artefakter."),
+Q("", "Vad är den grundläggande principen bakom dosmodulering i CT?", ["Strålningsutbytet anpassas efter patientens attenuering och aktuella strålväg.","Samma mA används genom hela undersökningen för att få jämn dos.","Rörspänningen stängs av helt i de delar av kroppen som attenuerar mest.","Patientdosen beräknas efter undersökningen men exponeringsparametrarna förändras inte."],0,"Dosmodulering anpassar strålningsutbytet efter patientens attenuering."),
+Q("", "Vilket påstående beskriver bäst varför korrekt patientcentrering är viktig vid CT?", ["Korrekt centrering påverkar endast hur symmetrisk den färdiga bilden ser ut.","Fel centrering kan påverka hur dosautomatiken bedömer patientens storlek och därmed påverka både bildkvalitet och strålningsutbyte.","Fel centrering påverkar endast fönstersättningen efter rekonstruktionen.","Korrekt centrering gör att dosmodulering inte längre behövs."],1,"Felcentrering kan påverka dosautomatikens uppskattning av patientstorlek och därmed både dos och bildkvalitet.")
+],
+"Område 5 – Dosimetri, biologiska effekter och strålskydd":[
+Q("", "Vad beskriver absorberad dos?", ["Hur mycket energi från joniserande strålning som absorberas per kilogram vävnad","Hur känsligt ett organ är för strålning jämfört med andra organ","Hur stor den totala bestrålade kroppsytan är","Hur många röntgenfotoner som produceras i röntgenröret"],0,"Absorberad dos är energi per kilogram vävnad."),
+Q("", "Vilken enhet används för absorberad dos?", ["Sievert, Sv","Gray, Gy","Becquerel, Bq","Coulomb, C"],1,"Absorberad dos mäts i gray (Gy)."),
+Q("", "Vad beskriver ekvivalent dos?", ["Absorberad dos justerad med hänsyn till vilken typ av strålning som orsakat exponeringen","Den totala mängden strålning som lämnar röntgenröret","Den absorberade dosen multiplicerad med patientens kroppsvikt","Ett mått på hur mycket spridd strålning som når personalen"],0,"Ekvivalent dos väger absorberad dos med strålningstypens biologiska verkan."),
+Q("", "Vad beskriver effektiv dos?", ["Den maximala absorberade dosen i ett enskilt organ","Den sammanlagda strålningsrisken där hänsyn tas till olika organs och vävnaders strålkänslighet","Den dos som alltid registreras direkt av röntgenutrustningen","Den stråldos som personalen får under en arbetsdag"],1,"Effektiv dos tar hänsyn till olika organs och vävnaders strålkänslighet."),
+Q("", "Vilken enhet används för både ekvivalent dos och effektiv dos?", ["Gray, Gy","Sievert, Sv","Watt, W","Joule, J"],1,"Ekvivalent och effektiv dos uttrycks i sievert (Sv)."),
+Q("", "Vilket påstående beskriver bäst skillnaden mellan absorberad dos och effektiv dos?", ["Absorberad dos beskriver energiavsättning i vävnad, medan effektiv dos även tar hänsyn till organens olika strålkänslighet","Absorberad dos används endast för personal, medan effektiv dos endast används för patienter","Absorberad dos och effektiv dos beskriver exakt samma fysikaliska storhet men med olika enheter","Effektiv dos beskriver bara hur stor del av kroppen som ligger i strålfältet"],0,"Absorberad dos är fysikalisk energiavsättning; effektiv dos inkluderar vävnadsviktning för risk."),
+Q("", "Vad beskriver DAP/KAP vid konventionell röntgen och genomlysning?", ["En kombination av stråldos i luft och den bestrålade arean","Den exakta absorberade dosen i varje organ","Enbart den högsta hudosen under undersökningen","Det totala antalet röntgenfotoner som registreras av detektorn"],0,"DAP/KAP kombinerar luftkerma/dos i luft med bestrålad area."),
+Q("", "Vad beskriver CTDIvol främst vid CT?", ["En standardiserad indikator på strålningsutbytet för ett CT-protokoll","Patientens exakta individuella organ- och helkroppsdos","Mängden kontrastmedel som används under undersökningen","Hur mycket bildbrus den färdiga CT-bilden innehåller"],0,"CTDIvol är en standardiserad indikator på CT-systemets strålningsutbyte."),
+Q("", "Vad beskriver DLP vid CT?", ["CTDIvol i relation till den undersökta scanlängden","Den högsta detektorsignalen under en rotation","Den effektiva dosen till patienten uttryckt exakt i sievert","Hur snabbt patientbordet rör sig genom gantryt"],0,"DLP kombinerar CTDIvol med undersökt längd."),
+Q("", "Hur kan joniserande strålning orsaka direkt DNA-skada?", ["Genom att strålningen överför energi direkt till DNA-molekylen","Genom att endast värma upp cellen så att DNA smälter","Genom att öka cellens syreupptag utan att påverka molekyler","Genom att förändra blodflödet utan energiöverföring till cellen"],0,"Direkt verkan innebär energiöverföring direkt till DNA."),
+Q("", "Vad menas med indirekt DNA-skada?", ["Strålningen påverkar främst vattenmolekyler och kan bilda reaktiva ämnen som senare skadar DNA","DNA skadas först flera år efter exponeringen utan någon tidigare kemisk påverkan","Skadan orsakas endast av mekaniskt tryck på cellkärnan","DNA påverkas enbart om hela cellen förstörs direkt av strålningen"],0,"Indirekt verkan går via radiolys av vatten och reaktiva radikaler."),
+Q("", "Vilken roll har fria radikaler vid strålningens biologiska verkan?", ["De kan reagera med biologiska molekyler och bidra till skador på bland annat DNA","De absorberar all röntgenstrålning innan den når cellkärnan","De skyddar DNA genom att neutralisera all strålningsenergi","De bildas endast vid icke-joniserande strålning"],0,"Fria radikaler kan reagera med DNA och andra biologiska molekyler."),
+Q("", "Vilket påstående beskriver vävnadsreaktioner bäst?", ["De har vanligen en tröskeldos och blir mer uttalade när dosen överstiger tröskeln","De kan uppstå oberoende av dosnivå och har ingen tröskel","De innebär alltid cancerutveckling efter lång tid","De förekommer endast efter exponering för icke-joniserande strålning"],0,"Vävnadsreaktioner har typiskt tröskel och svårighetsgrad som ökar med dos över tröskeln."),
+Q("", "Vilket påstående beskriver stokastiska effekter bäst?", ["Sannolikheten för effekten ökar med dosen, men allvarlighetsgraden bestäms inte på samma sätt av dosen","Effekten uppträder först när en tydlig tröskeldos har passerats","Effekten blir alltid allvarligare ju högre dosen är men sannolikheten är oförändrad","Effekten gäller endast tillfälliga hudreaktioner efter höga doser"],0,"För stokastiska effekter ökar sannolikheten med dosen."),
+Q("", "Vilken stokastisk effekt är mest relevant vid diagnostisk användning av joniserande strålning?", ["Ökad risk för strålningsinducerad cancer","Omedelbar vävnadsnekros efter varje exponering","Akut brännskada vid alla diagnostiska undersökningar","Tillfällig uppvärmning av vävnaden"],0,"Strålningsinducerad cancer är den centrala stokastiska risken vid diagnostiska dosnivåer."),
+Q("", "Varför är barn generellt mer strålkänsliga än vuxna?", ["De har fler växande och delande celler och dessutom längre återstående livstid där en sen effekt kan utvecklas","Deras vävnader attenuerar alltid all röntgenstrålning fullständigt","Deras skelett innehåller inga ämnen som absorberar röntgenstrålning","De får alltid högre fotonenergi vid samma rörspänning än vuxna"],0,"Barn har fler prolifererande celler och längre tid för sena effekter att utvecklas."),
+Q("", "Vad innebär ALARA-principen i praktiken?", ["Stråldosen ska hållas så låg som rimligen är möjlig samtidigt som undersökningen ger tillräcklig diagnostisk information","Stråldosen ska alltid vara så låg som tekniskt möjligt oavsett bildkvalitet","Alla patienter ska undersökas med samma exponeringsparametrar för att dosen ska bli jämförbar","Bildkvaliteten ska alltid maximeras även om stråldosen ökar"],0,"ALARA innebär så låg exponering som rimligen möjligt med bibehållen diagnostisk nytta."),
+Q("", "Vilket påstående sammanfattar bäst principerna tid, avstånd och skärmning för personalens strålskydd?", ["Kortare tid nära strålningen, större avstånd och lämplig skärmning kan tillsammans minska personalens exponering","Längre tid nära patienten, kortare avstånd och tunnare skärmning minskar spridd strålning","Endast avstånd har betydelse eftersom tid och skärmning inte påverkar personaldosen","Tid, avstånd och skärmning påverkar endast patientens exponering och inte personalens"],0,"Mindre tid, större avstånd och skärmning är grundprinciper för personalens strålskydd.")
+]};
+
+const quiz2 = [
+Q("Quiz 2 – Vad händer om...?", "En patient är betydligt tjockare än den patient som ett standardprotokoll är anpassat för. Vad händer om övriga förutsättningar är oförändrade?", ["Attenueringen minskar eftersom den större vävnadsvolymen gör att röntgenfotonerna sprids över en större yta och därför lättare når detektorn.","Attenueringen ökar eftersom strålningen passerar genom mer vävnad, vilket innebär att färre primärfotoner når detektorn om strålningsutbytet inte anpassas.","Fotonernas energi ökar automatiskt när de passerar genom den tjockare patienten, vilket kompenserar för den ökade attenueringen.","Attenueringen är i princip oförändrad eftersom den främst bestäms av rörspänningen och inte av den genomstrålade vävnadens tjocklek."],1,"Ökad vävnadstjocklek ökar attenueringen och minskar antalet primärfotoner som når detektorn."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om mAs fördubblas vid en konventionell röntgenexponering medan kV och övriga parametrar hålls oförändrade?", ["Den maximala fotonenergin fördubblas samtidigt som fotonantalet är i stort sett oförändrat, vilket främst förbättrar genomträngningen.","Fotonantalet ökar ungefär proportionellt, vilket kan minska det relativa kvantbruset men samtidigt ökar patientens exponering.","Fotonantalet minskar eftersom röntgenröret måste fördela samma energi över fler elektroner, vilket ger lägre patientdos.","Endast bildens visade ljushet förändras eftersom digital bildbearbetning gör att mAs inte längre påverkar den registrerade signalen."],1,"Ökad mAs ger fler fotoner, mindre relativt kvantbrus och högre exponering."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om kV höjs medan mAs lämnas oförändrat?", ["Röntgenspektrumets maximala energi och genomträngningsförmåga ökar, och även strålningsutbytet kan öka.","Endast antalet röntgenfotoner ökar medan deras energifördelning och genomträngningsförmåga förblir oförändrade.","Röntgenspektrumets maximala energi minskar eftersom den högre spänningen ger kortare exponeringstid.","Fotonerna får lägre energi men produceras i större antal, vilket alltid medför lägre patientdos."],0,"Högre kV höjer maximal energi och genomträngningsförmåga."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om strålfältet görs betydligt större än den anatomi som behöver avbildas?", ["En större vävnadsvolym bestrålas och mer spridd strålning kan bildas, vilket både kan öka patientexponeringen och försämra bildkontrasten.","Fler primärfotoner träffar detektorn utan att mängden spridd strålning förändras, vilket normalt förbättrar bildkontrasten.","Patientens absorberade energi minskar eftersom strålningen fördelas över en större kroppsyta, samtidigt som bildkontrasten förbättras.","Strålfältets storlek påverkar endast hur mycket av bilden som visas och har ingen betydelse för den faktiska bestrålningen."],0,"Större strålfält bestrålar mer vävnad och ökar vanligtvis mängden spridd strålning."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om en digital röntgenbild beskärs efter exponeringen för att efterlikna ett mindre strålfält?", ["Patientens stråldos minskar i efterhand eftersom de borttagna delarna av bilden inte längre ingår i undersökningen.","Mängden spridd strålning som bildades under exponeringen minskar eftersom bildbearbetningen tar bort signalen från dessa områden.","Bildens presentation förändras, men den bestrålade vävnadsvolymen och den spridda strålning som redan uppstod påverkas inte.","Beskärningen ger samma strålskyddseffekt som korrekt kollimering före exponeringen så länge samma anatomi visas."],2,"Efterbeskärning ändrar presentationen men inte den bestrålning som redan skett."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om ett aktivt AEC-mätfält delvis ligger utanför patientens kropp vid konventionell röntgen?", ["Relativt oattenuerad strålning når mätfältet snabbt, vilket kan göra att exponeringen avslutas för tidigt och relevant anatomi får otillräcklig signal.","Ingen strålning når mätfältet, vilket gör att systemet alltid fortsätter exponeringen tills säkerhetsbrytaren aktiveras.","AEC känner automatiskt igen att mätfältet ligger utanför patienten och byter till ett annat mätfält utan att exponeringen påverkas.","Mätfältet registrerar en lägre signal än normalt, vilket gör att exponeringen alltid ökar och leder till överexponering av hela bilden."],0,"Oattenuerad strålning kan nå AEC-fältet snabbt och avsluta exponeringen för tidigt."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om ett metallimplantat ligger över det AEC-mätfält som styr exponeringen?", ["Metallen ökar mängden strålning som når mätfältet och gör därför att exponeringen avslutas tidigare än avsett.","Metallen attenuerar mycket strålning, vilket kan göra att AEC fortsätter exponeringen längre för att nå målsignalen och därmed ökar exponeringen i andra delar av bilden.","AEC påverkas inte eftersom systemet endast mäter kV och exponeringstid, inte mängden strålning som når bildmottagaren.","Metallen gör att AEC automatiskt sänker både kV och mAs för att kompensera för den högre attenueringen."],1,"Metall kan ge mindre signal till AEC-fältet och förlänga exponeringen."),
+Q("Quiz 2 – Vad händer om...?", "Under genomlysning vinklas C-bågen så att strålningen måste passera genom en betydligt tjockare del av patienten. Vad kan hända?", ["Den automatiska dosratregleringen kan öka exempelvis kV, mA eller pulsbredd för att bibehålla användbar detektorsignal, även om bilden fortfarande ser ungefär lika ljus ut.","Systemet minskar automatiskt strålningsutbytet eftersom den längre strålvägen skapar fler fotoner genom spridning inne i patienten.","Bildens ljushet sjunker alltid kraftigt eftersom genomlysningssystem inte kan kompensera för förändrad patienttjocklek.","Doshastigheten är oförändrad eftersom automatiken endast reglerar bildskärmens ljusstyrka och inte röntgenrörets exponering."],0,"Automatiken kan öka strålningsutbytet för att kompensera för högre attenuering."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om pulsfrekvensen vid genomlysning sänks från ett högre till ett lägre värde?", ["Antalet röntgenpulser per sekund minskar, vilket kan minska den samlade exponeringen, men rörelseåtergivningen kan bli mindre jämn.","Dosen per sekund ökar alltid i exakt samma proportion som pulsfrekvensen minskar, så den totala exponeringen blir oförändrad.","Den rumsliga upplösningen fördubblas eftersom varje bildruta får längre tid att registrera anatomiska detaljer.","Strålningen övergår från joniserande till icke-joniserande eftersom det går längre tid mellan pulserna."],0,"Lägre pulsfrekvens kan minska exponeringen men ge mindre jämn rörelseåtergivning."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om en bild är mycket brusig och mAs höjs för att förbättra den, medan övriga faktorer är oförändrade?", ["Fler fotoner registreras och det relativa kvantbruset minskar, men förbättringen sker på bekostnad av högre patientexponering.","Fotonernas energi ökar och därför minskar bruset utan att antalet registrerade fotoner eller patientdosen förändras.","Bruset minskar eftersom högre mAs gör detektorns pixlar mindre och därmed förbättrar den rumsliga upplösningen.","Bruset försvinner helt när mAs når en viss nivå eftersom kvantbrus endast förekommer vid mycket låga exponeringar."],0,"Fler fotoner minskar relativt kvantbrus men ökar exponeringen."),
+Q("Quiz 2 – Vad händer om...?", "Vid CT rekonstrueras samma rådata till tunnare snitt. Vad händer vanligtvis med bildbruset?", ["Bruset minskar eftersom tunnare snitt innehåller mindre anatomi och därför kräver mindre signal.","Bruset ökar eftersom färre fotoner bidrar till informationen i varje rekonstruerat snitt.","Bruset är oförändrat eftersom snittjockleken endast påverkar hur bilderna visas, inte den rekonstruerade informationen.","Bruset försvinner eftersom tunnare snitt alltid ger högre rumslig upplösning och därmed bättre signal-brusförhållande."],1,"Tunnare snitt bygger på mindre signal per bildvolym och blir därför ofta brusigare."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om patienten ligger tydligt utanför isocentrum vid en CT-undersökning?", ["Felcentreringen kan påverka hur systemet bedömer patientens storlek och attenuering och därmed påverka både dosmodulering och bildkvalitet.","Felcentreringen påverkar endast hur patienten ser ut på scoutbilden och saknar betydelse när den egentliga datainsamlingen startar.","CT-systemet korrigerar alltid fullständigt för felcentrering efter undersökningen, så varken stråldos eller bildkvalitet påverkas.","Felcentreringen förändrar endast HU-värdena men påverkar inte strålningsutbytet eller detektorsignalen."],0,"Felcentrering kan påverka dosautomatikens uppskattning av patientstorlek och därmed dos/bildkvalitet."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om en patient rör sig under CT-datainsamlingen?", ["Mätningar som registrerats från olika vinklar kan inte längre motsvara exakt samma anatomiska läge, vilket kan ge rörelseartefakter i de rekonstruerade bilderna.","Rörelsen gör automatiskt att fler fotoner når detektorn och därför förbättras signal-brusförhållandet samtidigt som dosen minskar.","Rörelse påverkar endast bildvisningen efter rekonstruktionen och förändrar inte den information som finns i rådata.","Iterativ rekonstruktion kan alltid återställa den ursprungliga anatomiska informationen fullständigt oavsett hur mycket patienten har rört sig."],0,"Rörelse mellan projektioner gör projektionsdata inkonsistenta och kan ge artefakter."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om personalen under genomlysning fördubblar sitt avstånd från patienten, som är den huvudsakliga källan till spridd strålning?", ["Exponeringen kan minska tydligt eftersom strålintensiteten avtar kraftigt med ökande avstånd enligt inversa kvadratlagen.","Exponeringen blir ungefär dubbelt så hög eftersom personalen befinner sig längre från detektorernas skyddande effekt.","Exponeringen är oförändrad eftersom avstånd endast påverkar primärstrålningen och inte spridd strålning.","Exponeringen minskar endast om genomlysningstiden samtidigt halveras; avståndet har ingen självständig betydelse."],0,"Ökat avstånd minskar strålintensiteten kraftigt."),
+Q("Quiz 2 – Vad händer om...?", "En digital röntgenbild ser visuellt korrekt ut, men exponeringsindikatorn visar att detektorn fått betydligt mer strålning än avsett. Vilken slutsats är mest rimlig?", ["Bilden måste vara korrekt exponerad eftersom en digital bild som ser normal ut alltid motsvarar en optimal patientdos.","Bildbearbetningen kan ha normaliserat bildens ljushet trots en onödigt hög detektorexponering, vilket visar varför bildens utseende inte ensamt kan användas för att bedöma exponeringen.","Exponeringsindikatorn kan bortses från eftersom digitala detektorer inte påverkas av förändringar i strålningsmängden.","Den höga detektorexponeringen innebär sannolikt att för få fotoner producerades och att mAs därför behöver höjas ytterligare."],1,"Digital bildbearbetning kan maskera överexponering; exponeringsindikatorn behövs för bedömningen.")
+,
+Q("Quiz 2 – Vad händer om...?", "Vad händer om exponeringstiden förlängs medan mA sänks så att mAs blir oförändrad?", ["Den totala fotonmängden kan bli ungefär densamma, men den längre exponeringstiden kan öka risken för rörelseoskärpa.","Den maximala fotonenergin ökar eftersom en längre exponering alltid höjer kV.","Fotonmängden minskar kraftigt eftersom mA alltid har större betydelse än exponeringstiden.","Bildkontrasten ökar automatiskt eftersom längre exponeringstid minskar spridd strålning."],0,"Samma mAs kan ge ungefär samma fotonmängd, men längre exponeringstid kan öka risken för rörelseoskärpa."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om en patient rör sig under en konventionell röntgenexponering trots att exponeringsparametrarna i övrigt är korrekta?", ["Den rumsliga upplösningen kan försämras genom rörelseoskärpa även om detektorn har god upplösning.","Kvantbruset ökar alltid eftersom patientrörelse minskar fotonenergin.","Bildkontrasten ökar eftersom rörelse minskar mängden spridd strålning.","AEC kompenserar alltid för rörelsen genom att förkorta exponeringstiden efter att rörelsen har skett."],0,"Rörelse kan försämra detaljåtergivningen och därmed den rumsliga upplösningen."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om ett mycket litet strålfält används jämfört med ett onödigt stort strålfält vid samma undersökning?", ["Mindre vävnadsvolym bestrålas och mindre spridd strålning bildas, vilket kan gynna både patientdos och bildkontrast.","Mindre strålfält ger alltid fler fotoner till detektorn eftersom strålningen koncentreras.","Mindre strålfält sänker automatiskt fotonernas energi och försämrar genomträngningen.","Mindre strålfält påverkar bara bildens beskärning och inte den verkliga bestrålningen."],0,"Snäv kollimering begränsar bestrålad vävnad och reducerar spridd strålning."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om filtreringen ökas utan att andra exponeringsparametrar ändras?", ["Fler lågenergetiska fotoner avlägsnas, den genomsnittliga fotonenergin ökar och den totala fotonmängden minskar.","Den maximala fotonenergin höjs eftersom filtret tillför energi till fotonerna.","Endast högenergetiska fotoner avlägsnas, vilket sänker strålningens medelenergi.","Fotonmängden ökar eftersom filtret stimulerar röntgenproduktion i anoden."],0,"Ökad filtrering tar främst bort lågenergetiska fotoner och höjer medelenergin hos den kvarvarande strålningen."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om patienten placeras längre från detektorn vid en konventionell röntgenundersökning, medan övrig geometri är oförändrad?", ["Förstoring och geometrisk oskärpa kan öka eftersom objekt–detektoravståndet blir större.","Förstoringen minskar automatiskt eftersom objektet befinner sig längre från detektorn.","Geometrin påverkar bara kontrasten och inte storlek eller skärpa.","Kvantbruset försvinner eftersom den större bilden sprids över fler pixlar."],0,"Större objekt–detektoravstånd kan ge ökad förstoring och geometrisk oskärpa."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om ett CT-protokoll använder högre mAs medan övriga parametrar hålls oförändrade?", ["Fler fotoner registreras, vilket kan minska bildbruset men samtidigt öka strålningsutbytet till patienten.","Den maximala fotonenergin ökar i samma proportion som mAs.","Bruset ökar eftersom fler fotoner skapar större statistisk variation.","DLP blir alltid lägre eftersom högre mAs förkortar scanlängden."],0,"Högre mAs ger fler fotoner och kan minska brus, men innebär högre strålningsutbyte."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om scanlängden vid CT görs längre än vad den kliniska frågeställningen kräver, medan övriga parametrar är oförändrade?", ["DLP kan öka eftersom en större längd av patienten bestrålas.","CTDIvol blir alltid noll eftersom scanlängden inte ingår i CTDIvol.","Bildbruset minskar i alla snitt eftersom fler anatomiska områden registreras.","Den effektiva dosen blir alltid exakt dubbelt så hög oavsett hur mycket scanlängden ökas."],0,"Längre scanlängd innebär större bestrålad längd och kan därför öka DLP."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om personalen står kvar nära patienten under genomlysning längre tid än nödvändigt?", ["Den samlade personalexponeringen kan öka eftersom exponeringstiden för spridd strålning blir längre.","Exponeringen minskar eftersom längre tid ger spridda fotoner mer tid att förlora energi.","Personalens dos påverkas endast av avstånd och inte av tiden.","Patienten absorberar den spridda strålningen i stället när personalen står nära."],0,"Längre tid i ett strålfält med spridd strålning kan öka den samlade personalexponeringen."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om ett skyddande blyförkläde används korrekt under en situation med spridd strålning?", ["En del av den spridda strålningen attenueras i skyddet, vilket kan minska personalens exponering.","Blyförklädet minskar patientens primärdos genom att sänka röntgenrörets mA.","All strålning blockeras fullständigt oavsett fotonenergi och exponeringstid.","Blyförklädet gör att avstånd till patienten inte längre har någon betydelse."],0,"Skärmning attenuerar en del av den spridda strålningen och är en kompletterande strålskyddsåtgärd."),
+Q("Quiz 2 – Vad händer om...?", "Vad händer om en digital bild bearbetas kraftigt efter exponeringen för att öka den visade kontrasten?", ["Bildens presentation kan förändras, men bildbearbetningen kan inte skapa signal eller anatomisk information som aldrig registrerades.","Patientdosen minskar i efterhand eftersom mörka bildområden tas bort.","Detektorn får automatiskt fler fotoner trots att exponeringen redan är avslutad.","Bildbearbetningen gör att en mycket underexponerad bild alltid kan återställas utan kvalitetsförlust."],0,"Efterbearbetning kan förändra visningen men kan inte återskapa information som aldrig registrerades.")
+
+];
+
+const quiz3 = [
+Q("Quiz 3 – Tillämpad strålningsfysik","En röntgenbild har acceptabel kontrast men tydligt kvantbrus. Vilken förändring är mest direkt kopplad till en minskning av kvantbruset?",["Att öka antalet registrerade fotoner, exempelvis genom en högre mAs, vilket minskar den relativa statistiska variationen men samtidigt kan öka patientens exponering.","Att öka kollimeringen efter exponeringen genom digital beskärning, vilket minskar antalet brusiga pixlar utan att förändra exponeringen.","Att sänka kV så mycket som möjligt eftersom låg fotonenergi alltid ger fler registrerade fotoner och därmed mindre brus.","Att öka objekt–detektoravståndet eftersom större förstoring leder till att fler fotoner registreras i varje pixel."],0,"Kvantbrus minskar när fler fotoner registreras, men högre exponering måste vägas mot patientdosen."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan en digital röntgenbild se korrekt exponerad ut trots att patienten fått en högre exponering än nödvändigt?",["Digital bildbearbetning kan anpassa bildens visade ljushet och kontrast även när detektorn fått mer strålning än vad som behövdes.","Digitala detektorer registrerar inte variationer i strålningsmängd och därför påverkas bilden inte av en hög exponering.","Patientdosen bestäms enbart av kV och påverkas därför inte om mAs har varit högre än nödvändigt.","Bildens ljushet motsvarar alltid direkt mängden strålning som patienten absorberat, men skärmen kompenserar automatiskt för dosen."],0,"Digital bildbearbetning kan normalisera bildens utseende och därmed maskera onödigt hög exponering."),
+Q("Quiz 3 – Tillämpad strålningsfysik","En tjockare patient undersöks med samma exponeringsparametrar som en betydligt tunnare patient. Vad är den mest sannolika konsekvensen?",["Mer strålning attenueras i den tjockare patienten, vilket innebär att färre primärfotoner når detektorn och risken för ökat brus blir större.","Den tjockare patienten producerar fler röntgenfotoner genom spridning, vilket kompenserar för attenueringen och ger ungefär samma detektorsignal.","Röntgenfotonernas energi ökar automatiskt under passagen genom mer vävnad, vilket ger oförändrad bildkvalitet.","Patienttjockleken påverkar främst geometrisk förstoring och har liten betydelse för attenuering och detektorsignal."],0,"Ökad patienttjocklek ger mer attenuering och kan ge färre detektorfotoner och mer brus."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan ett större strålfält försämra bildkontrasten även om samma anatomi fortfarande avbildas?",["Ett större område av patienten bestrålas och kan producera mer spridd strålning som når detektorn och tillför ospecifik signal.","Ett större strålfält minskar fotonernas energi eftersom samma rörspänning fördelas över en större yta.","Ett större strålfält minskar alltid antalet primärfotoner som når detektorn och skapar därför automatiskt högre kontrast.","Ett större strålfält påverkar endast patientdosen eftersom spridd strålning inte påverkar digitala detektorer."],0,"Större bestrålad vävnadsvolym kan ge mer spridd strålning och sämre kontrast."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan ökad filtrering minska onödig energiavsättning i patienten?",["Filtreringen avlägsnar främst lågenergetiska fotoner som har liten sannolikhet att nå detektorn men kan absorberas i patienten.","Filtreringen ökar energin hos varje enskild foton efter att den har lämnat röntgenröret och gör därmed att ingen strålning absorberas i patienten.","Filtreringen minskar endast antalet högenergetiska fotoner och lämnar de lågenergetiska fotonerna oförändrade.","Filtreringen förändrar inte själva strålningen utan reducerar endast den bildsignal som visas på bildskärmen."],0,"Filtrering tar bort lågenergetiska fotoner som främst skulle absorberas i patienten."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan fotoelektrisk absorption bidra till både bildkontrast och patientdos?",["Fotonen absorberas helt, vilket kan skapa skillnader i attenuering mellan vävnader samtidigt som hela fotonens energi överförs lokalt.","Fotonen fortsätter i en ny riktning efter växelverkan och når ofta detektorn med högre energi än före växelverkan.","Processen sker endast i detektorn och påverkar därför bildkontrast men inte patientens energiabsorption.","Fotoelektrisk absorption minskar endast mängden spridd strålning och innebär ingen energiöverföring till patientens vävnad."],0,"Vid fotoelektrisk absorption försvinner fotonen helt och energin överförs lokalt samtidigt som attenueringsskillnader kan bidra till kontrast."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan Comptonspridning vara ett problem både för bildkvaliteten och för personalens strålskydd?",["Den spridda fotonen kan lämna sin ursprungliga riktning, nå detektorn och försämra kontrasten eller lämna patienten och bidra till personalens exponering.","Comptonprocessen absorberar alltid fotonen fullständigt i patienten och gör därför att ingen strålning kan nå vare sig detektor eller personal.","Comptonspridning uppstår huvudsakligen i röntgenröret och påverkar därför bara röntgenspektrumet före patienten.","Spridda fotoner har alltid högre energi än primärfotonerna och kan därför inte reduceras med avstånd eller skärmning."],0,"Spridda Comptonfotoner kan både försämra bildkontrast och exponera personal."),
+Q("Quiz 3 – Tillämpad strålningsfysik","En röntgenundersökning görs med AEC. Patienten är felcentrerad så att ett aktivt mätfält delvis ligger utanför kroppen. Varför kan detta ge en otillräcklig exponering?",["Mätfältet kan få relativt oattenuerad strålning och därför nå den förinställda signalnivån innan den relevanta anatomin fått tillräcklig exponering.","Mätfältet utanför patienten får ingen strålning alls och gör därför att röntgenröret automatiskt sänker mAs.","AEC mäter endast patientens position och kan därför inte påverka exponeringstiden när mätfältet ligger fel.","Ett mätfält utanför kroppen registrerar hög attenuering och gör därför att exponeringen alltid fortsätter längre än nödvändigt."],0,"Oattenuerad strålning kan få AEC att nå målsignalen för tidigt."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför är patientcentrering även viktig vid CT när automatisk dosmodulering används?",["Systemets uppskattning av patientens storlek och attenuering kan påverkas av felcentrering, vilket kan förändra både strålningsutbyte och bildkvalitet.","Dosmodulering fungerar endast när patienten ligger exakt i centrum eftersom CT-detektorer annars helt slutar registrera strålning.","Centrering påverkar enbart hur symmetrisk den färdiga bilden ser ut och har ingen betydelse för exponeringsautomatiken.","Felcentrering förändrar endast HU-skalan men kan inte påverka strålningsutbytet."],0,"Felcentrering kan påverka dosautomatikens uppskattning av patienten och därmed både dos och bildkvalitet."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Samma CT-rådata rekonstrueras både som tunna och tjockare snitt. Varför kan de tunna snitten upplevas som mer brusiga?",["Mindre signal bidrar till varje rekonstruerat snitt, vilket ökar den relativa statistiska variationen och därmed bruset.","Tunna snitt innebär automatiskt att kV sänks efter datainsamlingen, vilket ökar mängden brus.","Tunnare snitt ökar patientdosen i efterhand eftersom fler bilder skapas från samma rådata.","Brusnivån påverkas inte av snittjockleken eftersom samma rådata används i båda fallen."],0,"Tunnare snitt innehåller mindre signal per bildvolym och därför högre relativt brus."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan metall ge tydliga artefakter i en CT-bild?",["Metall kan attenuera strålningen mycket kraftigt, vilket ger otillräckliga eller mycket varierande detektormätningar som påverkar rekonstruktionen.","Metall producerar egna röntgenfotoner inne i patienten, vilket blandas med primärstrålningen och alltid ger ringartefakter.","Metall sänker automatiskt röntgenrörets rotationshastighet och skapar därför rörelseartefakter.","Metall påverkar enbart bildvisningen efter rekonstruktionen och inte de mätdata som används för att skapa bilden."],0,"Kraftig metallattenuering kan ge bristfälliga projektionsdata och rekonstruktionsartefakter."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför bör personalen i första hand öka avståndet till patienten under genomlysning när det är praktiskt möjligt?",["Patienten är en viktig källa till spridd strålning, och strålintensiteten minskar kraftigt när avståndet från källan ökar.","Avståndet förändrar patientens attenuering och gör därmed att genomlysningssystemet automatiskt minskar kV.","Spridd strålning påverkas inte av avstånd, men detektorn skärmar personalen bättre på längre avstånd.","Avståndet är endast viktigt för primärstrålen och har därför liten betydelse när personalen står utanför det direkta strålfältet."],0,"Patienten är huvudkälla till spridd strålning, och ökat avstånd minskar intensiteten."),
+Q("Quiz 3 – Tillämpad strålningsfysik","En genomlysningsundersökning går från en rak projektion till en kraftigt vinklad projektion genom en tjockare del av patienten. Varför kan strålningsutbytet öka?",["Den längre och mer attenuerande strålvägen kan göra att den automatiska dosratregleringen ökar exempelvis kV, mA eller pulsbredd för att bibehålla användbar detektorsignal.","Vinklingen gör att patienten producerar mer primärstrålning och systemet behöver därför öka exponeringen för att kompensera för den extra signalen.","En vinklad projektion minskar alltid attenueringen men kräver högre strålningsutbyte för att bibehålla bildens storlek.","Genomlysningssystemet använder samma strålningsutbyte oavsett projektion, så en eventuell ökning beror endast på längre undersökningstid."],0,"Ökad strålväg och attenuering kan få automatiken att höja strålningsutbytet."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför är det inte lämpligt att eftersträva högsta möjliga tekniska bildkvalitet vid varje undersökning?",["Förbättrad teknisk bildkvalitet kräver ibland mer strålning, medan målet är tillräcklig bildkvalitet för den diagnostiska uppgiften med så låg exponering som rimligen är möjlig.","Hög teknisk bildkvalitet gör alltid att bildkontrasten minskar och att anatomiska strukturer blir svårare att skilja åt.","Teknisk bildkvalitet och patientdos saknar samband i digital radiografi eftersom all bildkvalitet bestäms efter exponeringen.","En lägre bildkvalitet är alltid diagnostiskt bättre eftersom den innehåller mindre bearbetad information."],0,"Optimering handlar om tillräcklig diagnostisk kvalitet med rimligt låg exponering, inte maximal teknisk kvalitet."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Vilket resonemang beskriver bäst sambandet mellan röntgenproduktion, patient, detektor och bild?",["Exponeringsparametrarna påverkar den producerade strålningen, patientens vävnader attenuerar den olika, den kvarvarande strålningen registreras av detektorn och mängden samt fördelningen av den registrerade signalen påverkar den färdiga bildinformationen.","Detektorn bestämmer hur mycket röntgenstrålning som produceras, patienten påverkar främst bildens geometriska storlek och bildbearbetningen skapar därefter den anatomiska informationen.","Röntgenproduktionen och patientens attenuering avgör endast patientdosen, medan bildkvaliteten huvudsakligen skapas av bildskärmens inställningar.","När en digital detektor används är strålningens växelverkan med patienten mindre viktig eftersom bildbearbetningen kan återställa information som inte registrerades."],0,"Bildkedjan går från produktion via attenuering till detektion och bildframställning; bildbearbetning kan inte skapa saknad information.")
+,
+Q("Quiz 3 – Tillämpad strålningsfysik","En konventionell röntgenbild har låg kontrast och undersökningen gjordes med ett onödigt stort strålfält. Vilket resonemang beskriver bäst hur detta kan hänga ihop?",["Ett större bestrålat område kan ge mer spridd strålning som når detektorn och minskar skillnaden i signal mellan olika anatomiska områden.","Ett större strålfält höjer alltid den maximala fotonenergin och gör alla vävnader lika attenuerande.","Ett större strålfält gör att färre fotoner produceras i röntgenröret och därför försvinner kontrasten.","Strålfältets storlek påverkar endast patientdosen och saknar betydelse för bildkontrast."],0,"Större bestrålad volym kan skapa mer spridd strålning, vilket minskar kontrasten."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan samma mAs ge olika kliniskt resultat om exponeringstiden och mA kombineras på olika sätt?",["Fotonmängden kan vara liknande, men en längre exponeringstid kan öka risken för rörelseoskärpa och därmed försämra detaljåtergivningen.","Samma mAs betyder alltid identisk bildkvalitet oavsett exponeringstid, patientrörelse och geometri.","Högre mA sänker automatiskt kV och gör strålningen mindre genomträngande.","Exponeringstiden påverkar endast patientdosen och inte bildens skärpa."],0,"Samma mAs kan ge liknande fotonmängd, men tidskomponenten påverkar risken för rörelseoskärpa."),
+Q("Quiz 3 – Tillämpad strålningsfysik","En CT-undersökning visar mycket brus men den diagnostiska frågan kräver inte maximal detaljupplösning. Vilket resonemang ligger närmast en optimerad åtgärd?",["Man bör väga behovet av lägre brus mot möjlig dosökning och välja parametrar eller rekonstruktion som ger tillräcklig, inte maximal, bildkvalitet.","mAs bör alltid höjas så mycket som möjligt eftersom lägsta möjliga brus alltid är målet.","Bildbrus saknar betydelse i CT eftersom fönstersättning kan eliminera allt brus i efterhand.","Den enda relevanta åtgärden är att öka scanlängden så att fler fotoner samlas in."],0,"Optimering innebär tillräcklig diagnostisk bildkvalitet med rimligt låg strålningsbelastning."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan CTDIvol inte användas som ett exakt mått på en enskild patients absorberade dos?",["CTDIvol är en standardiserad dosindikator baserad på referensförhållanden och tar inte fullt hänsyn till den enskilda patientens storlek, anatomi och organfördelning.","CTDIvol beskriver endast antalet rekonstruerade bilder och saknar helt samband med strålningsutbytet.","CTDIvol motsvarar alltid exakt effektiv dos men uttrycks i fel enhet.","CTDIvol påverkas bara av bildskärmens inställningar och inte av undersökningsparametrarna."],0,"CTDIvol är en standardiserad indikator och inte ett direkt individuellt organdosmått."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan barn kräva särskilt noggrann optimering av undersökningar med joniserande strålning?",["Barn har generellt större biologisk känslighet och längre återstående livstid, samtidigt som mindre kroppsstorlek ofta gör att vuxenprotokoll skulle ge onödigt hög exponering.","Barn attenuerar alltid mer strålning än vuxna och behöver därför alltid högre kV och mAs.","Barn kan inte påverkas av stokastiska effekter eftersom deras celler delar sig snabbt.","Barn behöver mindre noggrann kollimering eftersom små kroppar automatiskt ger små strålfält."],0,"Barns strålkänslighet och mindre kroppsstorlek gör anpassning av protokoll särskilt viktig."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Vilket resonemang beskriver bäst varför ett dosvärde som avviker återkommande från det förväntade bör följas upp?",["Återkommande avvikelser kan signalera problem i protokoll, utrustning eller arbetssätt och därför vara ett underlag för kvalitetssäkring och optimering.","Dosvärden används endast för dokumentation och har ingen funktion i kvalitetsarbete.","Ett avvikande dosvärde visar alltid att undersökningen är felaktig och måste göras om.","Dosuppföljning behövs bara när en patient har fått en vävnadsreaktion."],0,"Dosdata kan användas för att identifiera systematiska avvikelser och förbättra protokoll och arbetssätt."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan en högre kV ibland kombineras med lägre mAs vid optimering av en konventionell röntgenundersökning?",["Högre kV ökar strålningens genomträngningsförmåga, vilket i vissa situationer kan möjliggöra lägre mAs men kräver samtidig bedömning av kontrast och patientexponering.","Högre kV gör att mAs inte längre påverkar fotonmängden.","Högre kV eliminerar all spridd strålning och gör därför mAs oviktigt.","Högre kV sänker alltid patientdosen oberoende av anatomi, detektor och vald mAs."],0,"kV och mAs behöver bedömas tillsammans eftersom de påverkar både strålningens energi, fotonmängd, bild och exponering."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan en bild med mycket god teknisk kvalitet ändå representera en mindre väl optimerad undersökning?",["Den tekniska kvaliteten kan ha uppnåtts med mer strålning än vad som behövdes för den diagnostiska uppgiften.","God teknisk kvalitet innebär alltid att kontrasten är för hög för diagnostik.","En tekniskt god digital bild kan endast skapas vid för låg patientdos.","Teknisk bildkvalitet och stråldos är helt oberoende av varandra."],0,"En undersökning är inte optimerad om bildkvaliteten överstiger behovet till priset av onödigt hög exponering."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Varför kan personalens position runt patienten ha stor betydelse vid genomlysning även när alla använder blyförkläde?",["Spridd strålning är ojämnt fördelad runt patienten, och avstånd samt placering i förhållande till strålkällan kan därför påverka exponeringen även med skärmning.","Blyförkläde gör att positionen aldrig påverkar personaldosen.","Personalen exponeras huvudsakligen av strålning från bildskärmen och därför spelar patientens position ingen roll.","Spridd strålning har samma intensitet överallt i rummet så länge genomlysningen pågår."],0,"Avstånd och position påverkar mängden spridd strålning som når personalen, även när skärmning används."),
+Q("Quiz 3 – Tillämpad strålningsfysik","Vilket resonemang beskriver bäst varför korrekt kollimering bör göras före exponeringen och inte ersättas med digital beskärning efteråt?",["Kollimering minskar den faktiskt bestrålade vävnadsvolymen och mängden spridd strålning, medan digital beskärning endast ändrar hur den redan registrerade bilden visas.","Digital beskärning reducerar patientdosen lika effektivt eftersom de borttagna pixlarna inte längre räknas.","Kollimering påverkar endast bildens storlek medan digital beskärning minskar spridd strålning.","Det finns ingen fysisk skillnad mellan kollimering före exponeringen och beskärning efter exponeringen."],0,"Kollimering påverkar själva bestrålningen; digital beskärning gör det inte.")
+
+];
+
+const TOPICS={
+  production:"Område 1 – Jonisation, röntgenrör och röntgenspektrum",
+  interaction:"Område 2 – Attenuering och växelverkan",
+  image:"Område 3 – Bildkvalitet, AEC och detektorer",
+  ct:"Område 4 – CT",
+  protection:"Område 5 – Dosimetri, biologiska effekter och strålskydd"
+};
+
+// Quiz 2 och 3 har också ämnestaggar. De gör resultatet användbart som
+// vägledning även när frågorna är formulerade som blandade kliniska situationer.
+const quiz2Topics=[
+  TOPICS.interaction,TOPICS.image,TOPICS.production,TOPICS.interaction,TOPICS.image,
+  TOPICS.image,TOPICS.image,TOPICS.protection,TOPICS.protection,TOPICS.image,
+  TOPICS.ct,TOPICS.ct,TOPICS.ct,TOPICS.protection,TOPICS.image,
+  TOPICS.image,TOPICS.image,TOPICS.interaction,TOPICS.production,TOPICS.image,
+  TOPICS.ct,TOPICS.ct,TOPICS.protection,TOPICS.protection,TOPICS.image
+];
+const quiz3Topics=[
+  TOPICS.image,TOPICS.image,TOPICS.interaction,TOPICS.interaction,TOPICS.production,
+  TOPICS.interaction,TOPICS.interaction,TOPICS.image,TOPICS.ct,TOPICS.ct,
+  TOPICS.ct,TOPICS.protection,TOPICS.protection,TOPICS.protection,TOPICS.image,
+  TOPICS.interaction,TOPICS.image,TOPICS.ct,TOPICS.ct,TOPICS.protection,
+  TOPICS.protection,TOPICS.production,TOPICS.protection,TOPICS.protection,TOPICS.interaction
+];
+quiz2.forEach((q,i)=>q.topic=quiz2Topics[i]);
+quiz3.forEach((q,i)=>q.topic=quiz3Topics[i]);
+
+const titles={q1:"Quiz 1 – Grundläggande strålningsfysik",q2:"Quiz 2 – Vad händer om...?",q3:"Quiz 3 – Tillämpad strålningsfysik"};
+let currentType=null,currentQuestions=[],idx=0,selected=null,answered=false,correctCount=0,areaStats={};
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function sample(a,n){return shuffle(a).slice(0,n)}
+function signature(qs){return qs.map(x=>x.__id).sort().join("|")}
+function randomizeOptions(q){
+  const order=shuffle(q.opts.map((_,i)=>i));
+  return {...q,opts:order.map(i=>q.opts[i]),ans:order.indexOf(q.ans)};
+}
+function cleanAreaName(area){return area.replace(/^Område \d+ – /,"")}
+
+function buildSet(type){
+  let qs=[];
+  if(type==="q1"){
+    Object.entries(quiz1).forEach(([area,arr])=>{
+      const n=3+Math.floor(Math.random()*3);
+      const tagged=arr.map((x,i)=>({...x,area,__id:`${area}:${i}`}));
+      qs.push(...sample(tagged,n));
+    });
+  }else{
+    const bank=type==="q2"?quiz2:quiz3;
+    const n=type==="q2" ? 8+Math.floor(Math.random()*3) : 10;
+    qs=sample(bank.map((x,i)=>({...x,__id:`${type}:${i}`})),n);
+  }
+  qs=shuffle(qs);
+  const key=`lastSig:${type}`;
+  const prev=localStorage.getItem(key);
+  let tries=0;
+  while(signature(qs)===prev && tries<40){
+    tries++;
+    if(type==="q1"){
+      qs=[];
+      Object.entries(quiz1).forEach(([area,arr])=>{
+        const n=3+Math.floor(Math.random()*3);
+        const tagged=arr.map((x,i)=>({...x,area,__id:`${area}:${i}`}));
+        qs.push(...sample(tagged,n));
+      });
+      qs=shuffle(qs);
+    }else{
+      const bank=type==="q2"?quiz2:quiz3;
+      const n=type==="q2" ? 8+Math.floor(Math.random()*3) : 10;
+      qs=sample(bank.map((x,i)=>({...x,__id:`${type}:${i}`})),n);
+      qs=shuffle(qs);
+    }
+  }
+  localStorage.setItem(key,signature(qs));
+  return qs.map(randomizeOptions);
+}
+
+function startQuiz(type){
+  currentType=type; currentQuestions=buildSet(type); idx=0; selected=null; answered=false; correctCount=0; areaStats={};
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("quiz").classList.remove("hidden");
+  document.getElementById("questionCard").classList.remove("hidden");
+  document.getElementById("resultCard").classList.add("hidden");
+  render();
+}
+function newQuiz(){if(currentType)startQuiz(currentType)}
+function goHome(){
+  document.getElementById("quiz").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function render(){
+  const q=currentQuestions[idx];
+  document.getElementById("quizTitle").textContent=titles[currentType];
+  document.getElementById("progressText").textContent=`${idx+1} / ${currentQuestions.length}`;
+  document.getElementById("progressBar").style.width=`${(idx/currentQuestions.length)*100}%`;
+  const pill=document.getElementById("areaPill");
+  pill.textContent=cleanAreaName(q.topic||q.area);
+  document.getElementById("questionText").textContent=q.q;
+  const box=document.getElementById("options"); box.innerHTML="";
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement("button"); b.className="option"; b.onclick=()=>choose(i,b);
+    b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)}</span><span>${o}</span>`;
+    box.appendChild(b);
+  });
+  document.getElementById("feedback").className="feedback hidden";
+  document.getElementById("feedback").innerHTML="";
+  document.getElementById("checkBtn").disabled=true;
+  document.getElementById("checkBtn").classList.remove("hidden");
+  document.getElementById("nextBtn").classList.add("hidden");
+  selected=null;answered=false;
+  window.scrollTo({top:0,behavior:"smooth"});
+  document.getElementById("questionText").focus({preventScroll:true});
+}
+function choose(i,el){
+  if(answered)return;
+  selected=i;
+  document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+  el.classList.add("selected");
+  document.getElementById("checkBtn").disabled=false;
+}
+function checkAnswer(){
+  if(selected===null||answered)return;
+  answered=true;
+  const q=currentQuestions[idx], ok=selected===q.ans;
+  if(ok)correctCount++;
+  const topic=q.topic||q.area;
+  areaStats[topic]??={right:0,total:0}; areaStats[topic].total++; if(ok)areaStats[topic].right++;
+  document.querySelectorAll(".option").forEach((el,i)=>{
+    el.disabled=true;
+    if(i===q.ans)el.classList.add("correct");
+    if(i===selected && !ok)el.classList.add("wrong");
+  });
+  const fb=document.getElementById("feedback");
+  fb.classList.remove("hidden"); fb.classList.add(ok?"good":"bad");
+  fb.innerHTML=`<strong>${ok?"Rätt svar.":"Inte riktigt."}</strong>Rätt svar är ${String.fromCharCode(65+q.ans)}. ${q.fb}`;
+  document.getElementById("checkBtn").classList.add("hidden");
+  document.getElementById("nextBtn").classList.remove("hidden");
+  document.getElementById("progressBar").style.width=`${((idx+1)/currentQuestions.length)*100}%`;
+}
+function nextQuestion(){
+  idx++;
+  if(idx>=currentQuestions.length)showResult(); else render();
+}
+function showResult(){
+  document.getElementById("questionCard").classList.add("hidden");
+  const r=document.getElementById("resultCard"); r.classList.remove("hidden");
+  const pct=Math.round(correctCount/currentQuestions.length*100);
+  document.getElementById("resultTitle").textContent=titles[currentType];
+  document.getElementById("score").textContent=`${pct}%`;
+  document.getElementById("scoreText").textContent=`Du fick ${correctCount} av ${currentQuestions.length} rätt.`;
+  const ar=document.getElementById("areaResults"); ar.innerHTML="";
+  const stats=Object.entries(areaStats).map(([area,s])=>({...s,area,pct:Math.round(s.right/s.total*100)})).sort((a,b)=>a.pct-b.pct||a.area.localeCompare(b.area,"sv"));
+  stats.forEach(s=>{
+    const level=s.pct<60?"prioritize":s.pct<80?"repeat":"strong";
+    const label=s.pct<60?"Prioritera detta område":s.pct<80?"Repetera området":"Bra grund i området";
+    const row=document.createElement("div"); row.className=`area-row ${level}`;
+    const name=document.createElement("span"); name.className="area-name"; name.textContent=cleanAreaName(s.area);
+    const score=document.createElement("strong"); score.className="area-score"; score.textContent=`${s.right}/${s.total}`;
+    const status=document.createElement("span"); status.className="area-status"; status.textContent=`${s.pct}% · ${label}`;
+    row.append(name,score,status); ar.appendChild(row);
+  });
+
+  const rec=document.getElementById("recommendation"); rec.innerHTML="";
+  const heading=document.createElement("h3"); heading.textContent="Din rekommendation";
+  const message=document.createElement("p");
+  const needs=stats.filter(s=>s.pct<80);
+  const priority=stats.filter(s=>s.pct<60);
+  if(!needs.length){
+    message.textContent="Du visar en bra grund inom alla områden som ingick den här gången. Starta ett nytt quiz för att pröva en ny frågekombination.";
+  }else{
+    const chosen=(priority.length?priority:needs).slice(0,2).map(s=>cleanAreaName(s.area));
+    const prefix=priority.length?"Börja med att träna mer på ":"Repetera gärna ";
+    message.textContent=prefix+chosen.join(chosen.length>1?" och ":"")+". Resultatet bygger på den här omgångens slumpade frågor; gör gärna ett nytt försök efter repetitionen.";
+  }
+  rec.append(heading,message);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
